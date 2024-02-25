@@ -172,10 +172,10 @@ void printTimeoutStats()
 void beep(int duration)
 {
     // turn on buzzer at 2000Hz frequency 
-    sys.buzzer(2000);
-    delay(duration);
+    // sys.buzzer(2000);
+    // delay(duration);
     // turn off buzzer
-    sys.buzzer(0);
+    // sys.buzzer(0);
 }
 
 #if LOG_EXT_SENSORS
@@ -253,7 +253,11 @@ void processOBD(CBuffer* buffer)
         }
     }
     byte pid = obdData[i].pid;
-    if (!obd.isValidPID(pid)) continue;
+    if (!obd.isValidPID(pid)) {
+      Serial.print("[OBD] invalid pid=");
+      Serial.println(pid);
+      continue;
+    }
     int value;
     if (obd.readPID(pid, value)) {
         obdData[i].ts = millis();
@@ -520,9 +524,116 @@ void initialize()
   // initialize OBD communication
   if (!state.check(STATE_OBD_READY)) {
     timeoutsOBD = 0;
-    if (obd.init()) {
+    if (obd.init(OBD_PROTOCOLS::PROTO_ISO15765_29B_500K)) {
       Serial.println("OBD:OK");
       state.set(STATE_OBD_READY);
+
+      Serial.print("OBD:PID_ENGINE_LOAD=");
+      Serial.println(obd.isValidPID(PID_ENGINE_LOAD));
+      Serial.print("OBD:PID_COOLANT_TEMP=");
+      Serial.println(obd.isValidPID(PID_COOLANT_TEMP));
+      Serial.print("OBD:PID_SHORT_TERM_FUEL_TRIM_1=");
+      Serial.println(obd.isValidPID(PID_SHORT_TERM_FUEL_TRIM_1));
+      Serial.print("OBD:PID_LONG_TERM_FUEL_TRIM_1=");
+      Serial.println(obd.isValidPID(PID_LONG_TERM_FUEL_TRIM_1));
+      Serial.print("OBD:PID_SHORT_TERM_FUEL_TRIM_2=");
+      Serial.println(obd.isValidPID(PID_SHORT_TERM_FUEL_TRIM_2));
+      Serial.print("OBD:PID_LONG_TERM_FUEL_TRIM_2=");
+      Serial.println(obd.isValidPID(PID_LONG_TERM_FUEL_TRIM_2));
+      Serial.print("OBD:PID_FUEL_PRESSURE=");
+      Serial.println(obd.isValidPID(PID_FUEL_PRESSURE));
+      Serial.print("OBD:PID_INTAKE_MAP=");
+      Serial.println(obd.isValidPID(PID_INTAKE_MAP));
+      Serial.print("OBD:PID_RPM=");
+      Serial.println(obd.isValidPID(PID_RPM));
+      Serial.print("OBD:PID_SPEED=");
+      Serial.println(obd.isValidPID(PID_SPEED));
+      Serial.print("OBD:PID_TIMING_ADVANCE=");
+      Serial.println(obd.isValidPID(PID_TIMING_ADVANCE));
+      Serial.print("OBD:PID_INTAKE_TEMP=");
+      Serial.println(obd.isValidPID(PID_INTAKE_TEMP));
+      Serial.print("OBD:PID_MAF_FLOW=");
+      Serial.println(obd.isValidPID(PID_MAF_FLOW));
+      Serial.print("OBD:PID_THROTTLE=");
+      Serial.println(obd.isValidPID(PID_THROTTLE));
+      Serial.print("OBD:PID_AUX_INPUT=");
+      Serial.println(obd.isValidPID(PID_AUX_INPUT));
+      Serial.print("OBD:PID_RUNTIME=");
+      Serial.println(obd.isValidPID(PID_RUNTIME));
+      Serial.print("OBD:PID_DISTANCE_WITH_MIL=");
+      Serial.println(obd.isValidPID(PID_DISTANCE_WITH_MIL));
+      Serial.print("OBD:PID_COMMANDED_EGR=");
+      Serial.println(obd.isValidPID(PID_COMMANDED_EGR));
+      Serial.print("OBD:PID_EGR_ERROR=");
+      Serial.println(obd.isValidPID(PID_EGR_ERROR));
+      Serial.print("OBD:PID_COMMANDED_EVAPORATIVE_PURGE=");
+      Serial.println(obd.isValidPID(PID_COMMANDED_EVAPORATIVE_PURGE));
+      Serial.print("OBD:PID_FUEL_LEVEL=");
+      Serial.println(obd.isValidPID(PID_FUEL_LEVEL));
+      Serial.print("OBD:PID_WARMS_UPS=");
+      Serial.println(obd.isValidPID(PID_WARMS_UPS));
+      Serial.print("OBD:PID_DISTANCE=");
+      Serial.println(obd.isValidPID(PID_DISTANCE));
+      Serial.print("OBD:PID_EVAP_SYS_VAPOR_PRESSURE=");
+      Serial.println(obd.isValidPID(PID_EVAP_SYS_VAPOR_PRESSURE));
+      Serial.print("OBD:PID_BAROMETRIC=");
+      Serial.println(obd.isValidPID(PID_BAROMETRIC));
+      Serial.print("OBD:PID_CATALYST_TEMP_B1S1=");
+      Serial.println(obd.isValidPID(PID_CATALYST_TEMP_B1S1));
+      Serial.print("OBD:PID_CATALYST_TEMP_B2S1=");
+      Serial.println(obd.isValidPID(PID_CATALYST_TEMP_B2S1));
+      Serial.print("OBD:PID_CATALYST_TEMP_B1S2=");
+      Serial.println(obd.isValidPID(PID_CATALYST_TEMP_B1S2));
+      Serial.print("OBD:PID_CATALYST_TEMP_B2S2=");
+      Serial.println(obd.isValidPID(PID_CATALYST_TEMP_B2S2));
+      Serial.print("OBD:PID_CONTROL_MODULE_VOLTAGE=");
+      Serial.println(obd.isValidPID(PID_CONTROL_MODULE_VOLTAGE));
+      Serial.print("OBD:PID_ABSOLUTE_ENGINE_LOAD=");
+      Serial.println(obd.isValidPID(PID_ABSOLUTE_ENGINE_LOAD));
+      Serial.print("OBD:PID_AIR_FUEL_EQUIV_RATIO=");
+      Serial.println(obd.isValidPID(PID_AIR_FUEL_EQUIV_RATIO));
+      Serial.print("OBD:PID_RELATIVE_THROTTLE_POS=");
+      Serial.println(obd.isValidPID(PID_RELATIVE_THROTTLE_POS));
+      Serial.print("OBD:PID_AMBIENT_TEMP=");
+      Serial.println(obd.isValidPID(PID_AMBIENT_TEMP));
+      Serial.print("OBD:PID_ABSOLUTE_THROTTLE_POS_B=");
+      Serial.println(obd.isValidPID(PID_ABSOLUTE_THROTTLE_POS_B));
+      Serial.print("OBD:PID_ABSOLUTE_THROTTLE_POS_C=");
+      Serial.println(obd.isValidPID(PID_ABSOLUTE_THROTTLE_POS_C));
+      Serial.print("OBD:PID_ACC_PEDAL_POS_D=");
+      Serial.println(obd.isValidPID(PID_ACC_PEDAL_POS_D));
+      Serial.print("OBD:PID_ACC_PEDAL_POS_E=");
+      Serial.println(obd.isValidPID(PID_ACC_PEDAL_POS_E));
+      Serial.print("OBD:PID_ACC_PEDAL_POS_F=");
+      Serial.println(obd.isValidPID(PID_ACC_PEDAL_POS_F));
+      Serial.print("OBD:PID_COMMANDED_THROTTLE_ACTUATOR=");
+      Serial.println(obd.isValidPID(PID_COMMANDED_THROTTLE_ACTUATOR));
+      Serial.print("OBD:PID_TIME_WITH_MIL=");
+      Serial.println(obd.isValidPID(PID_TIME_WITH_MIL));
+      Serial.print("OBD:PID_TIME_SINCE_CODES_CLEARED=");
+      Serial.println(obd.isValidPID(PID_TIME_SINCE_CODES_CLEARED));
+      Serial.print("OBD:PID_ETHANOL_FUEL=");
+      Serial.println(obd.isValidPID(PID_ETHANOL_FUEL));
+      Serial.print("OBD:PID_FUEL_RAIL_PRESSURE=");
+      Serial.println(obd.isValidPID(PID_FUEL_RAIL_PRESSURE));
+      Serial.print("OBD:PID_HYBRID_BATTERY_PERCENTAGE=");
+      Serial.println(obd.isValidPID(PID_HYBRID_BATTERY_PERCENTAGE));
+      Serial.print("OBD:PID_ENGINE_OIL_TEMP=");
+      Serial.println(obd.isValidPID(PID_ENGINE_OIL_TEMP));
+      Serial.print("OBD:PID_FUEL_INJECTION_TIMING=");
+      Serial.println(obd.isValidPID(PID_FUEL_INJECTION_TIMING));
+      Serial.print("OBD:PID_ENGINE_FUEL_RATE=");
+      Serial.println(obd.isValidPID(PID_ENGINE_FUEL_RATE));
+      Serial.print("OBD:PID_ENGINE_TORQUE_DEMANDED=");
+      Serial.println(obd.isValidPID(PID_ENGINE_TORQUE_DEMANDED));
+      Serial.print("OBD:PID_ENGINE_TORQUE_PERCENTAGE=");
+      Serial.println(obd.isValidPID(PID_ENGINE_TORQUE_PERCENTAGE));
+      Serial.print("OBD:PID_ENGINE_REF_TORQUE=");
+      Serial.println(obd.isValidPID(PID_ENGINE_REF_TORQUE));
+      Serial.print("OBD:PID_ODOMETER=");
+      Serial.println(obd.isValidPID(PID_ODOMETER));
+
+      Serial.print("");
 #if ENABLE_OLED
       oled.println("OBD OK");
 #endif
