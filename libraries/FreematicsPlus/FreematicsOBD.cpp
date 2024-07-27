@@ -353,8 +353,11 @@ bool COBD::isValidPID(byte pid)
 bool COBD::init(OBD_PROTOCOLS protocol, bool quick)
 {
 	const char *initcmd[] = {"ATE0\r", "ATH0\r"};
+	const char *startcmd[] = {"0100\r", "0120\r", "0140\r", "0160\r", "0180\r"};
 	char buffer[64];
 	bool success = false;
+
+	Serial.println("COBD::init");
 
 	if (!link) {
 		return false;
@@ -367,13 +370,17 @@ bool COBD::init(OBD_PROTOCOLS protocol, bool quick)
 			break;
 		}
 	}
-	if (!success) return false;
+	if (!success) {
+		Serial.println("ATZ Failure");
+		return false;
+	}
 	for (byte i = 0; i < sizeof(initcmd) / sizeof(initcmd[0]); i++) {
 		link->sendCommand(initcmd[i], buffer, sizeof(buffer), OBD_TIMEOUT_SHORT);
 	}
 	if (protocol != PROTO_AUTO) {
-		sprintf(buffer, "ATSP %X\r", protocol);
+		sprintf(buffer, "ATSP%X\r", protocol);
 		if (!link->sendCommand(buffer, buffer, sizeof(buffer), OBD_TIMEOUT_SHORT) || !strstr(buffer, "OK")) {
+			Serial.println("ATSP Failure");
 			return false;
 		}
 	}
@@ -383,43 +390,56 @@ bool COBD::init(OBD_PROTOCOLS protocol, bool quick)
 		return true;
 	}
 
-	success = false;
-	if (quick) {
-		int value;
-		if (!readPID(PID_SPEED, value)) return false;
-	} else {
-		for (byte n = 0; n < 2; n++) {
-			int value;
-			if (readPID(PID_SPEED, value)) {
-				success = true;
-				break;
-			}
-		}
-		if (!success) {
-			return false;
-		}
+	for (byte i = 0; i < sizeof(startcmd) / sizeof(startcmd[0]); i++) {
+		link->sendCommand(startcmd[i], buffer, sizeof(buffer), OBD_TIMEOUT_SHORT);
 	}
 
+	// success = false;
+	// if (quick) {
+	// 	int value;
+	// 	if (!readPID(PID_SPEED, value)) return false;
+	// } else {
+	// 	for (byte n = 0; n < 2; n++) {
+	// 		int value;
+	// 		if (readPID(PID_SPEED, value)) {
+	// 			success = true;
+	// 			break;
+	// 		}
+	// 	}
+	// 	if (!success) {
+	// 		Serial.println("Failed to read PID_SPEED");
+	// 		return false;
+	// 	}
+	// }
+	// char vinBuffer[80];
+	// if (getVIN(vinBuffer, sizeof(vinBuffer))) {
+	// 	Serial.print("VIN:");
+	// 	Serial.println(vinBuffer);
+	// } else {
+	// 	Serial.println("Failed to read VIN");
+	// 	return false;
+	// }
+
 	// load pid map
-	memset(pidmap, 0xff, sizeof(pidmap));
-	for (byte i = 0; i < 8; i++) {
-		byte pid = i * 0x20;
-		sprintf(buffer, "%02X%02X\r", dataMode, pid);
-		link->send(buffer);
-		if (!link->receive(buffer, sizeof(buffer), OBD_TIMEOUT_LONG) || checkErrorMessage(buffer)) {
-			break;
-		}
-		for (char *p = buffer; (p = strstr(p, "41 ")); ) {
-			p += 3;
-			if (hex2uint8(p) == pid) {
-				p += 2;
-				for (byte n = 0; n < 4 && *(p + n * 3) == ' '; n++) {
-					pidmap[i * 4 + n] = hex2uint8(p + n * 3 + 1);
-				}
-				success = true;
-			}
-		}
-	}
+	// memset(pidmap, 0xff, sizeof(pidmap));
+	// for (byte i = 0; i < 8; i++) {
+	// 	byte pid = i * 0x20;
+	// 	sprintf(buffer, "%02X%02X\r", dataMode, pid);
+	// 	link->send(buffer);
+	// 	if (!link->receive(buffer, sizeof(buffer), OBD_TIMEOUT_LONG) || checkErrorMessage(buffer)) {
+	// 		break;
+	// 	}
+	// 	for (char *p = buffer; (p = strstr(p, "41 ")); ) {
+	// 		p += 3;
+	// 		if (hex2uint8(p) == pid) {
+	// 			p += 2;
+	// 			for (byte n = 0; n < 4 && *(p + n * 3) == ' '; n++) {
+	// 				pidmap[i * 4 + n] = hex2uint8(p + n * 3 + 1);
+	// 			}
+	// 			success = true;
+	// 		}
+	// 	}
+	// }
 
 	if (success) {
 		m_state = OBD_CONNECTED;

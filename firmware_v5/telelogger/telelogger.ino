@@ -42,6 +42,8 @@
 #define STATE_WORKING 0x80
 #define STATE_STANDBY 0x100
 
+#define ACTIVE_OBD_PROTOCOL OBD_PROTOCOLS::PROTO_ISO15765_29B_500K
+
 typedef struct {
   byte pid;
   byte tier;
@@ -524,7 +526,7 @@ void initialize()
   // initialize OBD communication
   if (!state.check(STATE_OBD_READY)) {
     timeoutsOBD = 0;
-    if (obd.init(OBD_PROTOCOLS::PROTO_ISO15765_29B_500K)) {
+    if (obd.init(ACTIVE_OBD_PROTOCOL)) {
       Serial.println("OBD:OK");
       state.set(STATE_OBD_READY);
 
@@ -782,13 +784,13 @@ void process()
   if (state.check(STATE_OBD_READY)) {
     processOBD(buffer);
     if (obd.errors >= MAX_OBD_ERRORS) {
-      if (!obd.init()) {
+      if (!obd.init(ACTIVE_OBD_PROTOCOL)) {
         Serial.println("[OBD] ECU OFF");
         state.clear(STATE_OBD_READY | STATE_WORKING);
         return;
       }
     }
-  } else if (obd.init(PROTO_AUTO, true)) {
+  } else if (obd.init(ACTIVE_OBD_PROTOCOL, true)) {
     state.set(STATE_OBD_READY);
     Serial.println("[OBD] ECU ON");
   }

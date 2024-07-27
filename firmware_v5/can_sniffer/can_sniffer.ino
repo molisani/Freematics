@@ -32,8 +32,8 @@ void setup()
   // stop sniffing in case previously running
   obd.sniff(false);
 
-  // start on 11-bit/500Kbps CAN bus
-  while (!obd.init(PROTO_ISO15765_11B_500K)) Serial.print('.');
+  // start CAN bus
+  while (!obd.init(OBD_PROTOCOLS::PROTO_ISO15765_29B_500K)) Serial.print('.');
   
   // send a CAN message (clearing DTC)
   Serial.println("Sending a CAN message...");
@@ -48,8 +48,11 @@ void setup()
   }
 
   // we are interested in CAN messages with header 7E*
-  obd.setHeaderFilter(0x7E0);
-  obd.setHeaderMask(0xFFFFFFF0);
+  // obd.setHeaderFilter(0x7E0);
+  // obd.setHeaderMask(0xFFFFFFF0);
+
+  obd.setHeaderFilter(0x000);
+  obd.setHeaderMask(0x00000000);
 
   // start CAN bus sniffing
   obd.sniff();
